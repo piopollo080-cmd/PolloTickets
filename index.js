@@ -7,46 +7,38 @@ const client = new Client({
     ]
 });
 
-// Lista de canales activos de soporte
+// Conjunto de canales de soporte activos
 let canalesSoporte = new Set();
 
-client.once('ready', () => {
+client.once('ready', async () => {
     console.log(`Bot conectado como ${client.user.tag}`);
+
+    // Cargar todos los canales existentes que empiecen por "soporte"
+    client.guilds.cache.forEach(guild => {
+        guild.channels.cache.forEach(channel => {
+            if (channel.name.startsWith("soporte")) {
+                canalesSoporte.add(channel.id);
+                // Mensaje automático solo si el canal no tiene mensajes previos
+                if (channel.messages.cache.size === 0) {
+                    channel.send('Hola! Dame un momento, enseguida estoy contigo :)')
+                        .then(() => {
+                            setTimeout(() => {
+                                channel.send('Hola! ¿En qué te puedo ayudar?');
+                            }, 2000);
+                        });
+                }
+            }
+        });
+    });
 });
 
-// Detectar cuando se crea un canal de soporte
+// Detectar canales nuevos
 client.on('channelCreate', channel => {
-    if (channel.name.startsWith("soporte")) {  // ejemplo: soporte-usuario123
+    if (channel.name.startsWith("soporte")) {
         canalesSoporte.add(channel.id);
         console.log(`Canal de soporte detectado: ${channel.name}`);
-    }
-});
 
-// Responder solo en canales de soporte
-client.on('messageCreate', message => {
-    if (message.author.bot) return;
-    if (!canalesSoporte.has(message.channel.id)) return; // Solo soporte
-
-    if (message.content.toLowerCase() === 'hola') {
-        message.channel.send('Dame un momento, enseguida estoy contigo :)');
-        setTimeout(() => {
-            message.channel.send('Hola! ¿En qué te puedo ayudar?');
-        }, 2000);
-    }
-
-    if (message.content.toLowerCase().includes('ayuda')) {
-        message.channel.send('Ok, mejor llamo a un admin para ayudarte, ¡hasta otra!');
-    }
-});
-
-// Quitar de la lista cuando se elimina el canal
-client.on('channelDelete', channel => {
-    if (canalesSoporte.has(channel.id)) {
-        canalesSoporte.delete(channel.id);
-        console.log(`Canal de soporte eliminado: ${channel.name}`);
-    }
-});
-
-client.login(process.env.TOKEN);
-
-
+        // Mensaje automático al crear un canal
+        channel.send('Hola! Dame un momento, enseguida estoy contigo :)')
+            .then(() => {
+                setTimeout(() => {
