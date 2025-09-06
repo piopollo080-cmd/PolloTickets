@@ -1,30 +1,27 @@
 const { Client, GatewayIntentBits } = require('discord.js');
 const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent
-  ]
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent
+    ]
 });
 
-const TOKEN = process.env.TOKEN; // El token vendrá de las variables de entorno en Render
-
-client.on('ready', () => {
-  console.log(`Bot conectado como ${client.user.tag}`);
+client.once('ready', () => {
+    console.log(`Bot conectado como ${client.user.tag}`);
 });
 
-client.on('messageCreate', (message) => {
-  if (message.author.bot) return; // Ignorar mensajes de otros bots
+client.on('messageCreate', message => {
+    if (message.author.bot) return; // Ignorar mensajes de otros bots
 
-  if (message.content.toLowerCase() === 'hola') {
+    // Responder a cualquier mensaje con el saludo
     message.channel.send('Hola! Dame un momento, enseguida estoy contigo :)');
+
+    // Esperar un tiempo y luego responder con la segunda parte
     setTimeout(() => {
-      message.channel.send('En qué te puedo ayudar?');
-    }, 2000);
-  } else if (message.content.toLowerCase().includes('ayuda')) {
-    message.channel.send('Vale, mejor llamo a un admin para ayudarte. ¡Hasta otra!');
-    // Aquí puedes mencionar un rol si quieres: <@&ID_DEL_ROL>
-  }
+        message.channel.send('Ya estoy aquí! ¿En qué te puedo ayudar?');
+    }, 60000); // 60000 ms = 1 minuto
 });
 
-client.login(TOKEN);
+client.login(process.env.TOKEN);
+
